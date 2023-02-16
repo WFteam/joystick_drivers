@@ -1,0 +1,19 @@
+//
+// Glydways 2023
+// https://glydways.com/
+//
+
+namespace joy_linux::messages;
+
+schema JoyLinuxConfig
+{
+  /// Joy Node config
+  string dev;
+  string dev_name;
+  string dev_ff;
+  double deadzone;
+  double autorepeat_rate;
+  double coalesce_interval;
+  bool default_trig_val;
+  bool sticky_buttons;
+}
