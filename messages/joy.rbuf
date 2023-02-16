@@ -11,7 +11,7 @@ schema Joy
   system_time_point stamp;
 
   /// the axes measurements from a joystick
-  arraylist<int64> axes;
+  arraylist<float> axes;
 
   /// the buttons measurements from a joystick
   arraylist<int64> buttons;
