@@ -203,6 +203,11 @@ void Joystick::initialize(ark::pipeline::StageInterface& interfaces)
     // upload the effect
     // FIXME: check the return value here
     ioctl(ff_fd_, EVIOCSFF, &joy_effect_);
+
+    interfaces.add_timer(ark::pipeline::PeriodicTimerConfiguration{
+        .name = "timer",
+        .callback = [this](const std::chrono::steady_clock::time_point&) { timer(); },
+        .rate = std::chrono::milliseconds{5}});
   }
 }
 
@@ -212,17 +217,12 @@ void Joystick::timer() {
   double scale = -1. / (1. - deadzone_) / 32767.;
   double unscaled_deadzone = 32767. * deadzone_;
   bool tv_set = false;
-  bool publication_pending = false;
   struct timeval tv;
   tv.tv_sec = 1;
   tv.tv_usec = 0;
 
-  // Here because we want to reset it on device close.
-  messages::Joy joy_msg;
   double val;  // Temporary variable to hold event values
 
-  bool publish_now = false;
-  bool publish_soon = false;
   js_event event;
   fd_set set;
   auto joy_fd = joy_fd_;
@@ -278,13 +278,6 @@ void Joystick::timer() {
         } else {
           joy_msg.buttons[event.number] = (event.value ? 1 : 0);
         }
-        // For initial events, wait a bit before sending to try to catch
-        // all the initial events.
-        if (!(event.type & JS_EVENT_INIT)) {
-          publish_now = true;
-        } else {
-          publish_soon = true;
-        }
         break;
       case JS_EVENT_AXIS:
       case JS_EVENT_AXIS | JS_EVENT_INIT:
@@ -306,9 +299,6 @@ void Joystick::timer() {
             val = 0;
           }
           joy_msg.axes[event.number] = val * scale;
-          // Will wait a bit before sending to try to combine events.
-          publish_soon = true;
-          break;
         } else {
           if (!(event.type & JS_EVENT_INIT)) {
             val = event.value;
@@ -321,40 +311,33 @@ void Joystick::timer() {
             }
             joy_msg.axes[event.number] = val * scale;
           }
-
-          publish_soon = true;
-          break;
         }
+        break;
       default:
         break;
     }
-  } else if (tv_set) {  // Assume that the timer has expired.
-    joy_msg.stamp = std::chrono::system_clock::now();
-    publish_now = true;
   }
 
-  if (publish_now) {
     // Assume that all the JS_EVENT_INIT messages have arrived already.
     // This should be the case as the kernel sends them along as soon as
     // the device opens.
     joy_msg.stamp = std::chrono::system_clock::now();
+    size_t old_btn_size = joy_msg.buttons.size();
+    joy_msg.buttons.resize(5);
+    for (size_t i = old_btn_size; i < joy_msg.buttons.size(); i++) {
+        joy_msg.buttons[i] = 0.0;
+    }
+    size_t old_axes_size = joy_msg.axes.size();
+    joy_msg.axes.resize(8);
+    for (size_t i = old_axes_size; i < joy_msg.axes.size(); i++) {
+        joy_msg.axes[i] = 0.0;
+    }
+
+
     pub_->push(joy_msg);
 
-    publish_now = false;
     tv_set = false;
-    publication_pending = false;
-    publish_soon = false;
     pub_count_++;
-  }
-
-  // If an axis event occurred, start a timer to combine with other
-  // events.
-  if (!publication_pending && publish_soon) {
-    tv.tv_sec = trunc(coalesce_interval_);
-    tv.tv_usec = (coalesce_interval_ - tv.tv_sec) * 1e6;
-    publication_pending = true;
-    tv_set = true;
-  }
 
   // If nothing is going on, start a timer to do autorepeat.
   if (!tv_set && autorepeat_rate_ > 0) {

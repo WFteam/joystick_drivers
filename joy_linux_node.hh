@@ -71,6 +71,8 @@ private:
   int joy_fd_;
   struct ff_effect joy_effect_;
   bool update_feedback_;
+  // Here because we want to reset it on device close.
+  messages::Joy joy_msg;
 
   /*! \brief Returns the device path of the first joystick that matches joy_name.
    *         If no match is found, an empty string is returned.
