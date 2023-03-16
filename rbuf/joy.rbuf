@@ -3,7 +3,7 @@
 // https://glydways.com/
 //
 
-namespace joy_linux::messages;
+namespace joy_linux::rbuf;
 
 schema Joy
 {

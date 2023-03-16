@@ -94,7 +94,7 @@ Joystick::Joystick(std::string name)
 : ark::pipeline::Stage(std::move(name)), ff_fd_(-1)
 {}
 
-void Joystick::set_feedback(const std::shared_ptr<const messages::JoyFeedbackArray>& msg)
+void Joystick::set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg)
 {
   if (ff_fd_ == -1) {
     return;  // we arent ready yet
@@ -103,7 +103,7 @@ void Joystick::set_feedback(const std::shared_ptr<const messages::JoyFeedbackArr
   size_t size = msg->array.size();
   for (size_t i = 0; i < size; i++) {
     // process each feedback
-    if (msg->array[i].type == joy_linux::messages::FeedbackType::TYPE_RUMBLE && ff_fd_ != -1) {  // TYPE_RUMBLE
+    if (msg->array[i].type == joy_linux::rbuf::FeedbackType::TYPE_RUMBLE && ff_fd_ != -1) {  // TYPE_RUMBLE
       // if id is zero, thats low freq, 1 is high
       joy_effect_.direction = 0;  // down
       joy_effect_.type = FF_RUMBLE;
@@ -127,17 +127,17 @@ void Joystick::set_feedback(const std::shared_ptr<const messages::JoyFeedbackArr
 void Joystick::initialize(ark::pipeline::StageInterface& interfaces)
 {
   // Parameters
-  pub_ = interfaces.add_publisher<messages::Joy>(channel_names::JOY_CHANNEL);
+  pub_ = interfaces.add_publisher<rbuf::Joy>(channel_names::JOY_CHANNEL);
 
-  interfaces.add_subscriber(ark::pipeline::SubscriberConfiguration<messages::JoyFeedbackArray>{
+  interfaces.add_subscriber(ark::pipeline::SubscriberConfiguration<rbuf::JoyFeedbackArray>{
       .channel_name = channel_names::JOY_FEEDBACK_CHANNEL,
       .maximum_queue_depth = 10,
       .callback =
-          [this](const std::shared_ptr<const messages::JoyFeedbackArray>& msg) {
+          [this](const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg) {
               set_feedback(msg);
           },
   });
-  auto config = ark::pipeline::get_stage_config<messages::JoyLinuxConfig>(interfaces);
+  auto config = ark::pipeline::get_stage_config<rbuf::JoyLinuxConfig>(interfaces);
 
   joy_dev_ = config.dev;
   joy_dev_name_ = config.dev_name;

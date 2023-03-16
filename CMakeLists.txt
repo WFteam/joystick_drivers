@@ -5,8 +5,8 @@ glyd_add_library(
     SOURCES
         joy_linux_node.cc
     LIBRARIES
-        third_party::joy_linux::messages
+        third_party::joy_linux::rbuf
 		ark::pipeline
     )
 
-add_subdirectory(messages)
+add_subdirectory(rbuf)

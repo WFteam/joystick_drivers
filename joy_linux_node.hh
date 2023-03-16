@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include <third_party/joy_linux/messages/joy.hh>
-#include <third_party/joy_linux/messages/joy_linux_config.hh>
-#include <third_party/joy_linux/messages/joy_feedback.hh>
+#include <third_party/joy_linux/rbuf/joy.hh>
+#include <third_party/joy_linux/rbuf/joy_linux_config.hh>
+#include <third_party/joy_linux/rbuf/joy_feedback.hh>
 
 #include <chrono>
 #include <functional>
@@ -65,14 +65,14 @@ private:
   double coalesce_interval_;  // Defaults to 100 Hz rate limit.
   int event_count_;
   int pub_count_;
-  ark::pipeline::PublisherPtr<joy_linux::messages::Joy> pub_;
+  ark::pipeline::PublisherPtr<joy_linux::rbuf::Joy> pub_;
 
   int ff_fd_;
   int joy_fd_;
   struct ff_effect joy_effect_;
   bool update_feedback_;
   // Here because we want to reset it on device close.
-  messages::Joy joy_msg;
+  rbuf::Joy joy_msg;
 
   /*! \brief Returns the device path of the first joystick that matches joy_name.
    *         If no match is found, an empty string is returned.
@@ -82,7 +82,7 @@ private:
 public:
   explicit Joystick(std::string name = "Joystick");
 
-  void set_feedback(const std::shared_ptr<const messages::JoyFeedbackArray>& msg);
+  void set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg);
 
   void initialize(ark::pipeline::StageInterface& interfaces);
 

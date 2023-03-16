@@ -4,7 +4,7 @@
 #
 
 glyd_add_rbuf_library(
-	joy_linux_messages ALIAS third_party::joy_linux::messages
+	joy_linux_rbuf ALIAS third_party::joy_linux::rbuf
 	SOURCES
     joy.rbuf
     joy_feedback.rbuf
