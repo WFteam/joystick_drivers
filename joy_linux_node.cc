@@ -94,6 +94,15 @@ Joystick::Joystick(std::string name)
 : ark::pipeline::Stage(std::move(name)), ff_fd_(-1)
 {}
 
+Joystick::~Joystick()
+{
+  running_ = false;
+  if (read_thread_.joinable())
+  {
+    read_thread_.join();
+  }
+}
+
 void Joystick::set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg)
 {
   if (ff_fd_ == -1) {
@@ -203,11 +212,12 @@ void Joystick::initialize(ark::pipeline::StageInterface& interfaces)
     // upload the effect
     // FIXME: check the return value here
     ioctl(ff_fd_, EVIOCSFF, &joy_effect_);
-
-    interfaces.add_timer(ark::pipeline::PeriodicTimerConfiguration{
-        .name = "timer",
-        .callback = [this](const std::chrono::steady_clock::time_point&) { timer(); },
-        .rate = std::chrono::milliseconds{5}});
+    read_thread_ = std::thread([this]() {
+      while (!running_)
+      {
+        timer();
+      }
+    });
   }
 }
 

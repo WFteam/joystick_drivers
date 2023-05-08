@@ -73,6 +73,8 @@ private:
   bool update_feedback_;
   // Here because we want to reset it on device close.
   rbuf::Joy joy_msg;
+  std::thread read_thread_;
+  bool running_ = true;
 
   /*! \brief Returns the device path of the first joystick that matches joy_name.
    *         If no match is found, an empty string is returned.
@@ -81,6 +83,8 @@ private:
 
 public:
   explicit Joystick(std::string name = "Joystick");
+
+  ~Joystick();
 
   void set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg);
 
