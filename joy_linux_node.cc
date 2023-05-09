@@ -212,13 +212,17 @@ void Joystick::initialize(ark::pipeline::StageInterface& interfaces)
     // upload the effect
     // FIXME: check the return value here
     ioctl(ff_fd_, EVIOCSFF, &joy_effect_);
+  }
+}
+
+void Joystick::start(ark::pipeline::StageInterface & /*unused*/)
+{
     read_thread_ = std::thread([this]() {
-      while (!running_)
+      while (running_)
       {
         timer();
       }
     });
-  }
 }
 
 void Joystick::timer() {

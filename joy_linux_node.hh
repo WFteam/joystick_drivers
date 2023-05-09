@@ -55,42 +55,48 @@ namespace joy_linux {
 class Joystick : public ark::pipeline::Stage
 {
 private:
-  bool sticky_buttons_;
-  bool default_trig_val_;
-  std::string joy_dev_;
-  std::string joy_dev_name_;
-  std::string joy_dev_ff_;
-  double deadzone_;
-  double autorepeat_rate_;    // in Hz.  0 for no repeat.
-  double coalesce_interval_;  // Defaults to 100 Hz rate limit.
-  int event_count_;
-  int pub_count_;
-  ark::pipeline::PublisherPtr<joy_linux::rbuf::Joy> pub_;
+    bool sticky_buttons_;
+    bool default_trig_val_;
+    std::string joy_dev_;
+    std::string joy_dev_name_;
+    std::string joy_dev_ff_;
+    double deadzone_;
+    double autorepeat_rate_;    // in Hz.  0 for no repeat.
+    double coalesce_interval_;  // Defaults to 100 Hz rate limit.
+    int event_count_;
+    int pub_count_;
+    ark::pipeline::PublisherPtr<joy_linux::rbuf::Joy> pub_;
 
-  int ff_fd_;
-  int joy_fd_;
-  struct ff_effect joy_effect_;
-  bool update_feedback_;
-  // Here because we want to reset it on device close.
-  rbuf::Joy joy_msg;
-  std::thread read_thread_;
-  bool running_ = true;
+    int ff_fd_;
+    int joy_fd_;
+    struct ff_effect joy_effect_;
+    bool update_feedback_;
+    // Here because we want to reset it on device close.
+    rbuf::Joy joy_msg;
+    std::thread read_thread_;
+    bool running_ = true;
 
-  /*! \brief Returns the device path of the first joystick that matches joy_name.
-   *         If no match is found, an empty string is returned.
-   */
-  std::string get_dev_by_joy_name(const std::string & joy_name);
+    /*! \brief Returns the device path of the first joystick that matches joy_name.
+    *         If no match is found, an empty string is returned.
+    */
+    std::string get_dev_by_joy_name(const std::string & joy_name);
 
 public:
-  explicit Joystick(std::string name = "Joystick");
+    explicit Joystick(std::string name = "Joystick");
 
-  ~Joystick();
+    ~Joystick();
 
-  void set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg);
+    void set_feedback(const std::shared_ptr<const rbuf::JoyFeedbackArray>& msg);
 
-  void initialize(ark::pipeline::StageInterface& interfaces);
+    void initialize(ark::pipeline::StageInterface& interfaces) override;
 
-  void timer();
+    void timer();
+
+    ///
+    /// Indicates that the system has settled and you should begin any threads
+    /// or processing.
+    ///
+    void start(ark::pipeline::StageInterface &interface) override;
 };
 
 } // namespace joy_linux
