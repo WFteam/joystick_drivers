@@ -1,0 +1,20 @@
+//
+// Glydways 2023
+// https://glydways.com/
+//
+
+namespace joy_linux::rbuf;
+
+schema Joy
+{
+  /// Timestamp of message receipt
+  steady_time_point stamp;
+
+  /// the axes measurements from a joystick
+  arraylist<float> axes;
+
+  /// the buttons measurements from a joystick
+  arraylist<int64> buttons;
+}
+
+
