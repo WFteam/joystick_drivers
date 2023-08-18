@@ -273,7 +273,7 @@ void Joystick::timer() {
       return;  // Joystick is probably closed. Definitely occurs.
     }
 
-    joy_msg.stamp = std::chrono::system_clock::now();
+    joy_msg.stamp = std::chrono::steady_clock::now();
     event_count_++;
     switch (event.type) {
       case JS_EVENT_BUTTON:
@@ -335,7 +335,7 @@ void Joystick::timer() {
     // Assume that all the JS_EVENT_INIT messages have arrived already.
     // This should be the case as the kernel sends them along as soon as
     // the device opens.
-    joy_msg.stamp = std::chrono::system_clock::now();
+    joy_msg.stamp = std::chrono::steady_clock::now();
     size_t old_btn_size = joy_msg.buttons.size();
     joy_msg.buttons.resize(5);
     for (size_t i = old_btn_size; i < joy_msg.buttons.size(); i++) {

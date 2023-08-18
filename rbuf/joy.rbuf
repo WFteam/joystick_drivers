@@ -8,7 +8,7 @@ namespace joy_linux::rbuf;
 schema Joy
 {
   /// Timestamp of message receipt
-  system_time_point stamp;
+  steady_time_point stamp;
 
   /// the axes measurements from a joystick
   arraylist<float> axes;
