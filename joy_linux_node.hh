@@ -96,7 +96,7 @@ public:
     /// Indicates that the system has settled and you should begin any threads
     /// or processing.
     ///
-    void start(ark::pipeline::StageInterface &interface) override;
+    void start() override;
 };
 
 } // namespace joy_linux

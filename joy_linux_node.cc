@@ -215,7 +215,7 @@ void Joystick::initialize(ark::pipeline::StageInterface& interfaces)
   }
 }
 
-void Joystick::start(ark::pipeline::StageInterface & /*unused*/)
+void Joystick::start()
 {
     read_thread_ = std::thread([this]() {
       while (running_)
